@@ -34,35 +34,27 @@ def read_init():
         opts, args = getopt.getopt(sys.argv[1:], "C:c:d:o:",["help","C=","c="])
         city = ""
         for opt, arg in opts:
-            print(":::::!!!!opt?{}?arg: {}".format(opt,arg))
             if "-C" == opt:
-                print ("-C ???????{} ".format(arg))
-                city = arg
+                city = arg.upper()
 
             elif "-c" == opt:
-                print("-c ???????{} ".format(arg))
                 config = ConfigParser()
                 config.read(arg, encoding='UTF-8')
                 list1 = config.items(city)
                 for ii in list1 :
                     dict1[ii[0].strip()] = ii[1].strip()
-                print("?????????? dict1: {}".format(dict1))
             elif '-d' == opt:
-                print("-d ???????{} ".format(arg))
                 with open(arg) as myfile:
                     data1 = list(csv.reader(myfile))
-                       # print(data1)
                     for d in data1:
                         dict2[d[0].strip()] = d[1].strip()
-                print("user.csv ?? dict2 : {}".format(dict2))
             elif '-o' == opt:
-                print("-o ???????{} ".format(arg))
                 conn7.send(arg)
         conn1.send(dict1)
         conn3.send(dict2)
     except getopt.GetoptError as e:
         print("????????????? calculator.py -C cityname -c configfile -d userdata -o resultdata")
-        print(e)
+        exit()
 
 
 def sbjejs(gz,dict1):
@@ -78,16 +70,13 @@ def sbjejs(gz,dict1):
     GongJiJin = float(dict1["GongJiJin".lower()])
     gz = float(gz)
 
-    # print(dict1)
     if gz <= JiShuL:
         sbjs = JiShuL
     elif JiShuL < gz <= JiShuH:
         sbjs = gz
     elif gz > JiShuH:
         sbjs = JiShuH
-    # print("sbjs ? {}".format(sbjs))
     sbje = sbjs * (YangLao + YiLiao + ShiYe + GongShang + ShengYu + GongJiJin)
-    print("sbjejs()....sbje: {}".format(sbje))
     return  sbje
 
 
@@ -97,12 +86,11 @@ def gsjejs(gz, sbje):
     sl = 0
     sskcs = 0
     wxyj = 0.165
-    print("gsjejs()&&**&& sbje:{}".format(sbje))
     try:
         gz = float(gz)
     except Exception as e:
         print("Parameter Error")
-        print(e)
+        exit()
     yjssde = gz - float(sbje) - 5000
     if yjssde < 0:
         yjssde = 0
@@ -133,8 +121,6 @@ def gsjejs(gz, sbje):
     gsje = yjssde * sl - sskcs
     if gsje < 0:
         gsje = 0
-    # print("{:.2f}".format(gsje))
-    print("geshui jin e wei :{}".format(gsje))
     return  gsje
 
 
@@ -142,7 +128,6 @@ def jszhgz():
     data = []
     dict2 = conn4.recv()
     dict1 = conn2.recv()
-    print("dict1: {}, dict2: {}".format(dict1,dict2))
     # dict2 = {'101': '5000.00', '203': '6500.00', '309': '15000.00'}
     for mr in dict2.items():
 
@@ -158,7 +143,6 @@ def jszhgz():
 
         str1 = "{},{:.2f},{:.2f},{:.2f},{:.2f},{}".format(mr[0], float(mr[1]), sbje, gsje, shgz,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         data.append(str1)
-    print("data?{}".format(data))
     conn5.send(data)
 
 #???????????
